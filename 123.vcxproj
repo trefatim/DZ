@@ -75,10 +75,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="123.cpp" />
+    <ClCompile Include="Exceptions.cpp" />
     <ClCompile Include="Group.cpp" />
     <ClCompile Include="Student.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Exceptions.h" />
     <ClInclude Include="Group.h" />
     <ClInclude Include="Student.h" />
   </ItemGroup>

@@ -4,35 +4,17 @@
 #include <conio.h>
 #include <list>
 #include <iterator>
-#include <exception>
+#include "Exceptions.h"
 #include "Group.h"
 #include "Student.h"
 using namespace std;
 
-class MyException1 : public exception
-{
-public:
-	string what() 
-	{
-		return "There's no any group\n";
-	}
-};
-
-class MyException2 : public exception
-{
-public:
-	const char* what() 
-	{
-		return "Группа не найдена\n";
-	}
-};
-
-int find_group(string gr, list<StudyGroup> l)
+int FindGroup(string gr, list<StudyGroup> l)
 {
 	int k=0;
 	for (list<StudyGroup>::iterator i=l.begin(); i!=l.end(); i++)
 	{
-		if(gr==i->get_GroupName())
+		if(gr==i->GetGroupName())
 		{
 			k=1;
 		}
@@ -43,11 +25,10 @@ int find_group(string gr, list<StudyGroup> l)
 int main(int argc, char * argv[])
 {
 	setlocale(LC_ALL,"rus");
-	int a,aa, *points, NumOfSt, index, count=0;
+	int a, *points, index, count=0;
 	string Grou, Cura, *Subj, Sub, FN, SN, PT;
 	char c;
 	list <StudyGroup> MyList;
-	list <Students> l;
 	while (1)
 	{
 		system("cls");
@@ -55,13 +36,12 @@ int main(int argc, char * argv[])
 		cout<<"1:Добавить студента\n";
 		cout<<"2:Печать\n";
 		cout<<"3:Удалить группу\n";
-		cout<<"4:Удалить студента\n";
+		cout<<"4:Удалить студента по ссылке\n";
 		cout<<"5:Должники\n";
 		cout<<"6:Отличники\n";
 		cout<<"7:Средний балл по всем предметам\n";
 		cout<<"8:Средний балл до однму прдемету\n";
-		cout<<"9:Удаление студента по ссылке\n";
-		cout<<"d:Удаление студента по порядоковому номеру\n";
+		cout<<"9:Удалить студента по порядоковому номеру\n";
 		cout<<"e:Выход\n";
 		c=_getch();
 		switch (c)
@@ -71,21 +51,36 @@ int main(int argc, char * argv[])
 				fflush(stdin);
 				cout<<"Введите название группы:"<<endl;
 				getline(cin,Grou);
-				cout<<"Введите ФИО куратора:"<<endl;
-				getline(cin,Cura);
-				cout<<"Введите кол-во предметов:"<<endl;
-				cin>>a;
-				Subj=new string[a];
-				cout<<"Введите список предметов:"<<endl;
-				fflush(stdin);
-				for (int i=0; i<a; i++)
+				try
 				{
-					getline(cin,Subj[i]);
+					if(FindGroup(Grou,MyList)==1)
+					{
+						throw GroupAlreadyExist();
+					}
+					cout<<"Введите ФИО куратора:"<<endl;
+					getline(cin,Cura);
+					cout<<"Введите кол-во предметов:"<<endl;
+					cin>>a;
+					Subj=new string[a];
+					cout<<"Введите список предметов:"<<endl;
+					fflush(stdin);
+					for (int i=0; i<a; i++)
+					{
+						getline(cin,Subj[i]);
+					}
+					StudyGroup gruppa(a,Grou,Cura,Subj);
+					MyList.push_back(gruppa);
+					count++;
+					delete []Subj;
+					cout<<"Группа добавлена";
+					system("pause");
+					break;
 				}
-				StudyGroup gruppa(a,Grou,Cura,Subj);
-				MyList.push_back(gruppa);
-				count++;
-				cout<<"Группа добавлена";
+				catch(GroupAlreadyExist &mm)
+				{
+					cout<<mm.what()<<"\n";
+				}
+				system("pause");
 				break;
 			}
 
@@ -95,22 +90,22 @@ int main(int argc, char * argv[])
 				{
 					if(MyList.empty())
 					{
-						throw MyException1();
+						throw NoAnyGroup();
 					}
 					cout<<"Введите группу, куда добавить студента:";
 					fflush(stdin);
 					getline(cin,Grou);
 					try
 					{
-						if (find_group(Grou, MyList)!=1)
+						if (FindGroup(Grou, MyList)!=1)
 						{
-							throw MyException2();
+							throw GroupNotFound();
 						}
 						for (list<StudyGroup>::iterator i=MyList.begin(); i!=MyList.end(); i++)
 						{
-							if(i->get_GroupName()==Grou)
+							if(i->GetGroupName()==Grou)
 							{
-								a=i->get_NumOfSubj();
+								a=i->GetNumOfSubjects();
 								cout<<"Введите фамилию студента:";
 								fflush(stdin);
 								getline(cin,SN);
@@ -124,22 +119,34 @@ int main(int argc, char * argv[])
 								cout<<"Введите баллы\n";
 								for(int j=0; j<a; j++)
 								{
-									cout<<i->get_Subject(j)<<" ";
+									cout<<i->GetSubject(j)<<" ";
 									fflush(stdin);
 									cin>>points[j];
 								}
 								Students st(FN, SN, PT, points,a);
-								i->add(st,i);
-								cout<<"Студент добавлен\n";
+								try
+								{
+									if (i->HasLink(st)==true)
+									{
+										throw StudentAlreadyExist();
+									}
+									i->Add(st);
+									
+									cout<<"Студент добавлен\n";
+								}
+								catch(StudentAlreadyExist &m)
+								{
+									cout<<m.what();
+								}
 							}
 						}
 					}
-					catch(MyException2 &s)
+					catch(GroupNotFound &s)
 					{
 						cout<<s.what();
 					}
 				}
-				catch(MyException1 &c)
+				catch(NoAnyGroup &c)
 				{
 					cout<<c.what();
 				}
@@ -152,14 +159,14 @@ int main(int argc, char * argv[])
 			{
 				if(MyList.empty())
 				{
-					throw MyException1();
+					throw NoAnyGroup();
 				}
 				for(list<StudyGroup>::iterator i=MyList.begin(); i!=MyList.end(); i++)
 				{
 					cout<<i;
 				}
 			}
-			catch(MyException1 &c)
+			catch(NoAnyGroup &c)
 			{
 				cout<<c.what();
 			}
@@ -172,20 +179,20 @@ int main(int argc, char * argv[])
 				{
 					if(MyList.empty())
 					{
-						throw MyException1();
+						throw NoAnyGroup();
 					}	
 					cout<<"Введите группу: ";
 					fflush(stdin);
 					getline(cin,Grou);
 					try
 					{
-						if(find_group(Grou, MyList)==0)
+						if(FindGroup(Grou, MyList)==0)
 						{
-							throw MyException2();
+							throw GroupNotFound();
 						}
 						for(list<StudyGroup>::iterator i=MyList.begin(); i!=MyList.end();)
 						{
-							if (i->get_GroupName()==Grou)
+							if (i->GetGroupName()==Grou)
 							{
 								i=MyList.erase(i);
 							}
@@ -196,12 +203,12 @@ int main(int argc, char * argv[])
 						}
 						cout<<"Группа удалена";
 					}
-					catch(MyException2 &s)
+					catch(GroupNotFound &s)
 					{
 						cout<<s.what();
 					}
 				}
-				catch(MyException1 &c)
+				catch(NoAnyGroup &c)
 				{
 					cout<<c.what();
 				}
@@ -215,20 +222,20 @@ int main(int argc, char * argv[])
 				{
 					if(MyList.empty())
 					{
-						throw MyException1();
+						throw NoAnyGroup();
 					}
 					cout<<"Введите группу, из которой удалить студента: ";\
 					fflush(stdin);
 					getline(cin,Grou);
 					try
 					{
-						if (find_group(Grou, MyList)==0)
+						if (FindGroup(Grou, MyList)==0)
 						{
-							throw MyException2();
+							throw GroupNotFound();
 						}
 						for(list<StudyGroup>::iterator i=MyList.begin(); i!=MyList.end();i++)
 						{
-							if(i->get_GroupName()==Grou)
+							if(i->GetGroupName()==Grou)
 							{
 								cout<<"Введите фамилию студента: ";
 								fflush(stdin);
@@ -239,40 +246,28 @@ int main(int argc, char * argv[])
 								cout<<"Введите отчество студента: ";
 								fflush(stdin);
 								getline(cin,PT);
-								l=i->get_list();
-								if(i->has(SN,FN,PT,l)==false)
+								try
 								{
-									cout<<"Студент не найден";
-								}
-								else
-								{
-									l=i->get_list();
-									for(list<Students>::iterator j=l.begin(); j!=l.end();)
+									if(i->Has(SN,FN,PT)==false)
 									{
-										if ((j->get_FirstName()==FN)&&(j->get_SecondName()==SN)&&(j->get_Patronymic()==PT))
-										{
-											j=l.erase(j);
-										}
-										else
-										{
-											j++;
-										}
+										throw StudentNotFound();
 									}
-									i->set_list(l);
-									a=i->getCount();
-									a--;
-									i->set_NumOfStud(a);
-									cout<<"Студент удален";
+									Students s=i->GetLink(SN,FN,PT);
+									i->RemoveByLink(s);
+								}
+								catch(StudentNotFound &zz)
+								{
+									cout<<zz.what()<<"\n";
 								}
 							}
 						}
 					}
-					catch(MyException2 &s)
+					catch(GroupNotFound &s)
 					{
 						cout<<s.what();
 					}
 				}
-				catch(MyException1 &c)
+				catch(NoAnyGroup &c)
 				{
 					cout<<c.what();
 				}
@@ -286,33 +281,31 @@ int main(int argc, char * argv[])
 				{
 					if(MyList.empty())
 					{
-						throw MyException1();
+						throw NoAnyGroup();
 					}
 					cout<<"Введите группу, в которой искать должников: ";\
 					fflush(stdin);
 					getline(cin,Grou);
 					try
 					{
-						if (find_group(Grou, MyList)==0)
+						if (FindGroup(Grou, MyList)==0)
 						{
-							throw MyException2();
+							throw GroupNotFound();
 						}
 						for(list<StudyGroup>::iterator i=MyList.begin(); i!=MyList.end();i++)
 						{
-							if(i->get_GroupName()==Grou)
+							if(i->GetGroupName()==Grou)
 							{
-								l=i->get_list();
-								a=i->get_NumOfSubj();
-								i->find_Duty(l,a);
+								i->FindDuty();
 							}
 						}
 					}
-					catch(MyException2 &s)
+					catch(GroupNotFound &s)
 					{
 						cout<<s.what();
 					}
 				}
-				catch(MyException1 &c)
+				catch(NoAnyGroup &c)
 				{
 					cout<<c.what();
 				}
@@ -326,33 +319,31 @@ int main(int argc, char * argv[])
 				{
 					if(MyList.empty())
 					{
-						throw MyException1();
+						throw NoAnyGroup();
 					}
 					cout<<"Введите группу, в которой искать отличников: ";
 					fflush(stdin);
 					getline(cin,Grou);
 					try
 					{
-						if (find_group(Grou, MyList)==0)
+						if (FindGroup(Grou, MyList)==0)
 						{
-							throw MyException2();
+							throw GroupNotFound();
 						}
 						for(list<StudyGroup>::iterator i=MyList.begin(); i!=MyList.end();i++)
 						{
-							if(i->get_GroupName()==Grou)
+							if(i->GetGroupName()==Grou)
 							{
-								l=i->get_list();
-								a=i->get_NumOfSubj();
-								i->find_Excellent(l,a);
+								i->FindExcellent();
 							}
 						}
 					}
-					catch(MyException2 &s)
+					catch(GroupNotFound &s)
 					{
 						cout<<s.what();
 					}
 				}
-				catch(MyException1 &c)
+				catch(NoAnyGroup &c)
 				{
 					cout<<c.what();
 				}
@@ -366,34 +357,31 @@ int main(int argc, char * argv[])
 				{
 					if(MyList.empty())
 					{
-						throw MyException1();
+						throw NoAnyGroup();
 					}
 					cout<<"Введите группу: ";
 					fflush(stdin);
 					getline(cin,Grou);
 					try
 					{
-						if (find_group(Grou, MyList)==0)
+						if (FindGroup(Grou, MyList)==0)
 						{
-							throw MyException2();
+							throw GroupNotFound();
 						}
 						for(list<StudyGroup>::iterator i=MyList.begin(); i!=MyList.end();i++)
 						{
-							if(i->get_GroupName()==Grou)
+							if(i->GetGroupName()==Grou)
 							{
-								l=i->get_list();
-								a=i->get_NumOfSubj();
-								aa=i->getCount();
-								i->srAllSub(l,a,aa);
+								i->SrAllSubjects();
 							}
 						}
 					}
-					catch(MyException2 &s)
+					catch(GroupNotFound &s)
 					{
 						cout<<s.what();
 					}
 				}
-				catch(MyException1 &c)
+				catch(NoAnyGroup &c)
 				{
 					cout<<c.what();
 				}
@@ -407,44 +395,46 @@ int main(int argc, char * argv[])
 				{
 					if(MyList.empty())
 					{
-						throw MyException1();
+						throw NoAnyGroup();
 					}
 					cout<<"Введите группу: ";
 					fflush(stdin);
 					getline(cin,Grou);
 					try
 					{
-						if (find_group(Grou, MyList)==0)
+						if (FindGroup(Grou, MyList)==0)
 						{
-							throw MyException2();
+							throw GroupNotFound();
 						}
 						for(list<StudyGroup>::iterator i=MyList.begin(); i!=MyList.end();i++)
 						{
-							if(i->get_GroupName()==Grou)
+							if(i->GetGroupName()==Grou)
 							{
 								cout<<"Введите предмет: ";
 								fflush(stdin);
 								getline(cin,Sub);
-								index=i->find_Sub(Sub,i);
-								if (index==-1)
+								index=i->FindIndexSubject(Sub);
+								try
 								{
-									cout<<"Предмет не найден";
+									if (index==-1)
+									{
+									throw SubjectNotFound();
+									}
+									i->SrOneSubject(index);
 								}
-								else
+								catch (SubjectNotFound &gg)
 								{
-									NumOfSt=i->getCount();
-									l=i->get_list();
-									i->srOneSub(l,NumOfSt,index);
-								}	
+									cout<<gg.what()<<" ";
+								}
 							}
 						}
 					}
-					catch(MyException2 &s)
+					catch(GroupNotFound &s)
 					{
 						cout<<s.what();
 					}
 				}
-				catch(MyException1 &c)
+				catch(NoAnyGroup &c)
 				{
 					cout<<c.what();
 				}
@@ -458,92 +448,45 @@ int main(int argc, char * argv[])
 				{
 					if(MyList.empty())
 					{
-						throw MyException1();
+						throw NoAnyGroup();
 					}
 					cout<<"Введите группу, из которой удалить студента: ";\
 					fflush(stdin);
 					getline(cin,Grou);
 					try
 					{
-						if (find_group(Grou, MyList)==0)
+						if (FindGroup(Grou, MyList)==0)
 						{
-							throw MyException2();
+							throw GroupNotFound();
 						}
 						for(list<StudyGroup>::iterator i=MyList.begin(); i!=MyList.end();i++)
 						{
-							if(i->get_GroupName()==Grou)
+							if(i->GetGroupName()==Grou)
 							{
 								cout<<"Введите порядковый номер студента: ";
 								fflush(stdin);
 								cin>>a;
-								if((a>i->getCount())||(a==0))
+								try
 								{
-									cout<<"такого нет";
+									if((a>i->GetNumOfStudents())||(a==0))
+									{
+										throw StudentIndexNotFound();
+									}
+									i->RemoveByIndex(a);
 								}
-								else
+								catch(StudentIndexNotFound &ggg)
 								{
-									l=i->get_list();
-									Students s=i->get(a,l);
-									i->remove(s,l,i);
-								}
-							}
-						}
-					}
-					catch(MyException2 &s)
-					{
-						cout<<s.what();
-					}
-				}
-				catch(MyException1 &c)
-				{
-					cout<<c.what();
-				}
-				system("pause");
-				break;
-			}
-
-		case 'd':
-			{
-				try
-				{
-					if(MyList.empty())
-					{
-						throw MyException1();
-					}
-					cout<<"Введите группу, из которой удалить студента: ";\
-					fflush(stdin);
-					getline(cin,Grou);
-					try
-					{
-						if (find_group(Grou, MyList)==0)
-						{
-							throw MyException2();
-						}
-						for(list<StudyGroup>::iterator i=MyList.begin(); i!=MyList.end();i++)
-						{
-							if(i->get_GroupName()==Grou)
-							{
-								cout<<"Введите порядковый номер студента: ";
-								fflush(stdin);
-								cin>>a;
-								if((a>i->getCount())||(a==0))
-								{
-									cout<<"такого нет";
-								}
-								else
-								{
-									l=i->get_list();
-									i->remoove(a,l,i);
+									cout<<ggg.what()<<" ";
 								}
 							}
 						}
 					}
-					catch(MyException2 &s)
+					catch(GroupNotFound &s)
 					{
 						cout<<s.what();
 					}
 				}
-				catch(MyException1 &c)
+				catch(NoAnyGroup &c)
 				{
 					cout<<c.what();
 				}

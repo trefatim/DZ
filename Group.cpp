@@ -12,80 +12,60 @@ StudyGroup::StudyGroup()
 	NumOfSubj=0;
 	Group="";
 	Curator="";
-	Subjects=NULL;
 }
 
-StudyGroup::StudyGroup(const int &NoSub,const string &Gr,const string &Cur,string *Sub)
+StudyGroup::StudyGroup(const int& NoSub,const string& Gr,const string& Cur,string *Sub)
 {
 	NumOfSubj=NoSub;
 	NumOfStud=0;
 	Group=Gr;
 	Curator=Cur;
-	Subjects= new string[NoSub];
 	for (int i=0; i<NoSub; i++)
 	{
-		Subjects[i]=Sub[i];
+		Subjects.push_back(Sub[i]);
 	}
 }
 
-StudyGroup::StudyGroup(const StudyGroup &st)
+StudyGroup::StudyGroup(const StudyGroup& st)
 {
 	NumOfStud=st.NumOfStud;
 	NumOfSubj=st.NumOfSubj;
 	Group=st.Group;
 	Curator=st.Curator;
-	Subjects=new string[NumOfSubj];
-	for (int i=0; i<NumOfSubj; i++)
-	{
-		Subjects[i]=st.Subjects[i];
-	}
-	list<Students> l=st.student;
-	string FN,SN,PT;
-	for(list<Students>::iterator it=l.begin(); it!=l.end(); it++)
-	{
-		FN=it->get_FirstName();
-		SN=it->get_SecondName();
-		PT=it->get_Patronymic();
-		int *point=new int[NumOfSubj];
-		for(int i=0;i<NumOfSubj;i++)
-		{
-			point[i]=it->get_StudentPoints()[i];
-		}
-		Students s(FN,SN,PT,point,NumOfSubj);
-		student.push_back(s);
-	}
+	Subjects=st.Subjects;
+	student=st.student;
 }
 
-StudyGroup::~StudyGroup()
-{
-	delete []Subjects;
-}
-
-int StudyGroup::getCount()const
+int StudyGroup::GetNumOfStudents()const
 {
 	return NumOfStud;
 }
 
-string StudyGroup::get_GroupName() const
+string StudyGroup::GetGroupName()const
 {
 	return Group;
 }
 
-int StudyGroup::get_NumOfSubj() const
+int StudyGroup::GetNumOfSubjects()const
 {
 	return NumOfSubj;
 }
 
-void StudyGroup::set_NumOfStud(const int &n)
+void StudyGroup::SetNumOfStud(const int& n)
 {
 	NumOfStud=n;
 }
 
-bool StudyGroup::has(const string &SN,const string &FN,const string &PT,list<Students> l)
+void StudyGroup::SetNumOfSubjects(const int& n)
 {
-	for (list<Students>::iterator i=l.begin(); i!=l.end(); i++)
+	NumOfSubj=n;
+}
+
+bool StudyGroup::Has(const string& SN,const string& FN,const string& PT)
+{
+	for (list<Students>::iterator i=student.begin(); i!=student.end(); i++)
 	{
-		if ((i->get_SecondName()==SN)&&(i->get_FirstName()==FN)&&(i->get_Patronymic()==PT))
+		if ((i->GetSecondName()==SN)&&(i->GetFirstName()==FN)&&(i->GetPatronymic()==PT))
 		{
 			return true;
 		}
@@ -93,70 +73,99 @@ bool StudyGroup::has(const string &SN,const string &FN,const string &PT,list<Stu
 	return false;
 }
 
-string StudyGroup::get_Subject(const int &n)const
+bool StudyGroup::HasLink(const Students& st)
 {
-	return Subjects[n];
+	for (list<Students>::iterator i=student.begin(); i!=student.end(); i++)
+	{
+		if ((*i)==st)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
-int StudyGroup::find_Sub(const string &Sub, list<StudyGroup>::iterator it)
+string StudyGroup::GetSubject(const int& n)
 {
-	for (int i=0; i<it->NumOfSubj; i++)
+	int count=0;
+	for(list<string>::iterator it=Subjects.begin(); it!=Subjects.end(); ++it)
 	{
-		if (Sub==it->Subjects[i])
+		if(count==n)
+		{
+			return (*it);
+		}
+		count++;
+	}
+	return "";
+}
+
+int StudyGroup::FindIndexSubject(const string& Sub)
+{
+	int i=0;
+	for (list<string>::iterator it=Subjects.begin(); it!=Subjects.end(); ++it)
+	{
+		if (Sub==(*it))
 		{
 			return i;
 		}
+		i++;
 	}
 	return -1;
 }
 
-ostream& operator <<(ostream &out, list<StudyGroup>::iterator it)
+ostream& operator <<(ostream& out, list<StudyGroup>::iterator it)
 {
 	cout<<"\nГруппа: "<<it->Group;
 	cout<<"\nКуратор: "<<it->Curator;
 	cout<<"\nКол-во студентов: "<<it->NumOfStud;
 	cout<<"\nКол-во предметов: "<<it->NumOfSubj;
 	cout<<"\nПредметы: ";
-	for(int i=0; i<it->NumOfSubj; i++)
+	list<string> ll=it->Subjects;
+	for(list<string>::iterator itt=ll.begin(); itt!=ll.end(); ++itt)
 	{
-		cout<<it->Subjects[i]<<" ";
+		cout<<(*itt)<<" ";
 	}
-	list <Students> l=it->get_list();
+	list <Students> l=it->GetStudentList();
 	for(list<Students>::iterator j=l.begin(); j!=l.end(); j++)
 	{
-		cout<<"\nСтудент: "<<j->get_SecondName()<<" "
-			<<j->get_FirstName()<<" "<< j->get_Patronymic();
+		cout<<"\nСтудент: "<<j->GetSecondName()<<" "
+			<<j->GetFirstName()<<" "<< j->GetPatronymic();
 		cout<<"\nБаллы: ";
-		int *arr=j->get_StudentPoints();
-		for(int i=0; i<it->get_NumOfSubj(); i++)
+		list<int> arr=j->GetStudentPoints();
+		for(list<int>::iterator i=arr.begin(); i!=arr.end(); ++i)
 		{
-			cout<<arr[i]<<" ";
+			cout<<(*i)<<" ";
 		}
 	}
 	cout<<"\n";
 	return out;
 }
 
-list <Students> StudyGroup::get_list()
+list <Students> StudyGroup::GetStudentList()const
 {
 	return student;
 }
 
-void StudyGroup::set_list(list<Students> lis)
+void StudyGroup::SetStudentList(list<Students> lis)
 {
 	student=lis;
 }
 
-void StudyGroup::find_Duty(list<Students> l,const int &n)
+void StudyGroup::SetGroupName(const string& name)
 {
-	int k,k1=0,*arr;
-	for(list<Students>::iterator i=l.begin(); i!=l.end();i++)
+	Group=name;
+}
+
+void StudyGroup::FindDuty()
+{
+	int k,k1=0;
+	for(list<Students>::iterator i=student.begin(); i!=student.end(); i++)
 	{
 		k=0;
-		arr=i->get_StudentPoints();
-		for (int j=0; j<n; j++)
+		list<int> arr=i->GetStudentPoints();
+		for (list<int>::iterator j=arr.begin(); j!=arr.end(); ++j)
 		{
-			if (arr[j]<60)
+			if ((*j)<60)
 			{
 				k=1;
 				k1++;
@@ -164,7 +173,7 @@ void StudyGroup::find_Duty(list<Students> l,const int &n)
 		}
 		if (k==1)
 		{
-			cout<<i->get_SecondName()<<" "<<i->get_FirstName()<<" "<<i->get_Patronymic()<<"\n";
+			cout<<i->GetSecondName()<<" "<<i->GetFirstName()<<" "<<i->GetPatronymic()<<"\n";
 		}
 	}
 	if(k1==0)
@@ -173,23 +182,23 @@ void StudyGroup::find_Duty(list<Students> l,const int &n)
 	}
 }
 
-void StudyGroup::find_Excellent(list<Students> l, int n)
+void StudyGroup::FindExcellent()
 {
-	int k, k1=0, *arr;
-	for(list<Students>::iterator i=l.begin(); i!=l.end();i++)
+	int k, k1=0;
+	for(list<Students>::iterator i=student.begin(); i!=student.end();i++)
 	{
 		k=0;
-		arr=i->get_StudentPoints();
-		for (int j=0; j<n; j++)
+		list<int> arr=i->GetStudentPoints();
+		for (list<int>::iterator j=arr.begin(); j!=arr.end(); ++j)
 		{
-			if (arr[j]>=85)
+			if ((*j)>=85)
 			{
 				k++;
 			}
 		}
-		if (k==n)
+		if (k==NumOfSubj)
 		{
-			cout<<i->get_SecondName()<<" "<<i->get_FirstName()<<" "<<i->get_Patronymic()<<"\n";
+			cout<<i->GetSecondName()<<" "<<i->GetFirstName()<<" "<<i->GetPatronymic()<<"\n";
 			k1++;
 		}
 	}
@@ -199,47 +208,54 @@ void StudyGroup::find_Excellent(list<Students> l, int n)
 	}
 }
 	
-void StudyGroup::srAllSub(list<Students> l,const int &nSub,const int &nStud)
+void StudyGroup::SrAllSubjects()
 {
-	if(nStud==0)
+	if(NumOfStud==0)
 	{
 		cout<<"В группе нет студентов";
 	}
 	else
 	{
-		int k=0,*arr;
+		int k=0;
 		float sr=0;
-		for(list<Students>::iterator i=l.begin(); i!=l.end();i++)
+		for(list<Students>::iterator i=student.begin(); i!=student.end();i++)
 		{
 			k=0;
-			arr=i->get_StudentPoints();
-			for (int j=0; j<nSub; j++)
+			list<int> arr=i->GetStudentPoints();
+			for (list<int>::iterator j=arr.begin(); j!=arr.end(); ++j)
 			{
-				k+=arr[j];
+				k+=(*j);
 			}
-			sr=sr+(k/nSub);
+			sr=sr+(k/NumOfSubj);
 		}
-		sr/=nStud;
+		sr/=NumOfStud;
 		cout<<sr;
 	}
 }
 
-void StudyGroup::srOneSub(list<Students> l,const int &nStud,const int &ind)
+void StudyGroup::SrOneSubject(const int& ind)
 {
-	if(nStud==0)
+	if(NumOfStud==0)
 	{
 		cout<<"В группе нет студентов";
 	}
 	else
 	{
 		float sr=0;
-		int *arr;
-		for(list<Students>::iterator i=l.begin(); i!=l.end();i++)
+		for(list<Students>::iterator i=student.begin(); i!=student.end();i++)
 		{
-			arr=i->get_StudentPoints();
-			sr+=arr[ind];
+			list<int> arr=i->GetStudentPoints();
+			int count=0;
+			for(list<int>::iterator it=arr.begin(); it!=arr.end(); ++it)
+			{
+				if(count==ind)
+				{
+					sr+=(*it);
+				}
+				count++;
+			}
 		}
-		sr/=nStud;
+		sr/=NumOfStud;
 		cout<<sr;
 	}
 }
@@ -250,88 +266,59 @@ StudyGroup& StudyGroup::operator =(const StudyGroup& st)
 	NumOfSubj=st.NumOfSubj;
 	Group=st.Group;
 	Curator=st.Curator;
-	Subjects=new string[NumOfSubj];
-	for (int i=0; i<NumOfSubj; i++)
-	{
-		Subjects[i]=st.Subjects[i];
-	}
-	list<Students> l=st.student;
-	string FN,SN,PT;
-	for(list<Students>::iterator it=l.begin(); it!=l.end(); it++)
-	{
-		FN=it->get_FirstName();
-		SN=it->get_SecondName();
-		PT=it->get_Patronymic();
-		int *point=new int[NumOfSubj];
-		for(int i=0;i<NumOfSubj;i++)
-		{
-			point[i]=it->get_StudentPoints()[i];
-		}
-		Students s(FN,SN,PT,point,NumOfSubj);
-		student.push_back(s);
-	}
+	Subjects=st.Subjects;
+	student=st.student;
 	return *this;
 }
 
-bool StudyGroup::operator<(const StudyGroup &st)
+bool StudyGroup::operator<(const StudyGroup& st)const
 {
 	return NumOfStud<st.NumOfStud;
 }
 
-bool StudyGroup::operator>(const StudyGroup &st)
+bool StudyGroup::operator>(const StudyGroup& st)const
 {
 	return NumOfStud>st.NumOfStud;
 }
 
-bool StudyGroup::operator==(const StudyGroup &st)
+bool StudyGroup::operator==(const StudyGroup& st)const
 {
-	return NumOfStud==st.NumOfStud;
+	return Group==st.Group;
 }
 
-bool StudyGroup::operator!=(const StudyGroup &st)
+bool StudyGroup::operator!=(const StudyGroup& st)const
 {
 	return !(operator==(st));
 }
 
-void StudyGroup::add(const Students &st, list<StudyGroup>::iterator it)
+void StudyGroup::Add(const Students& st)
 {
-	int a;
-	list<Students> l;
-	l=it->get_list();
-	l.push_back(st);
-	it->set_list(l);
-	a=it->getCount();
-	a++;
-	it->set_NumOfStud(a);
-	l.push_back(st);
+	student.push_back(st);
+	NumOfStud++;
 }
 
-Students& StudyGroup::get(const int& i, list<Students> l)
+Students& StudyGroup::GetLink(const string& SN,const string& FN, const string& PT)
 {
 	static Students st;
 	int j=0;
-	for(list<Students>::iterator it=l.begin(); it!=l.end(); it++)
+	for(list<Students>::iterator it=student.begin(); it!=student.end(); it++)
 	{
-		j++;
-		if(j==i)
+		if((it->GetFirstName()==FN)&&(it->GetSecondName()==SN)&&(it->GetPatronymic()==PT))
 		{
-			st=*it;
+			st=(*it);
 		}
 	}
 	return st;
 }
 
-void StudyGroup::remove(const Students &st, list<Students> l, list<StudyGroup>::iterator itt)
+void StudyGroup::RemoveByLink(const Students& st)
 {
-	for (list<Students>::iterator it=l.begin(); it!=l.end();)
+	for (list<Students>::iterator it=student.begin(); it!=student.end();)
 	{
-		if (*it==st)
+		if ((*it)==st)
 		{
-			it=l.erase(it);
-			itt->set_list(l);
-			int a=itt->getCount();
-			a--;
-			itt->set_NumOfStud(a);
+			it=student.erase(it);
+			NumOfStud--;
 			cout<<"Студент удален";
 		}
 		else
@@ -341,19 +328,16 @@ void StudyGroup::remove(const Students &st, list<Students> l, list<StudyGroup>::
 	}
 }
 
-void StudyGroup::remoove(const int &i, list<Students> l, list<StudyGroup>::iterator itt)
+void StudyGroup::RemoveByIndex(const int& i)
 {
 	int j=0;
-	for(list<Students>::iterator it=l.begin(); it!=l.end();)
+	for(list<Students>::iterator it=student.begin(); it!=student.end();)
 	{
 		j++;
 		if(j==i)
 		{
-			it=l.erase(it);
-			itt->set_list(l);
-			int a=itt->getCount();
-			a--;
-			itt->set_NumOfStud(a);
+			it=student.erase(it);
+			NumOfStud--;
 			cout<<"Студент удален";
 		}
 		else
