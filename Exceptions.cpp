@@ -1,39 +1,34 @@
-#include "Exceptions.h"
+// Copyright 2015 <Anton Sidorov>
 #include <iostream>
+#include "Exceptions.h"
 
-using namespace std;
+using std::cout;
+using std::cin;
 
-const char* NoAnyGroup::what()
-{
-	return "There's no any group\n";
+const char* NoAnyGroup::what() {
+    return "There's no any group\n";
 }
 
-const char* GroupNotFound::what()
-{
-	return "Группа не найдена\n";
+const char* GroupNotFound::what() {
+    return "Group not found\n";
 }
 
-const char* StudentAlreadyExist::what()
-{
-	return "Студент уже существует\n";
+const char* StudentAlreadyExist::what() {
+    return "Student already exists\n";
 }
 
-const char* GroupAlreadyExist::what()
-{
-	return "Группа уже существует\n";
+const char* GroupAlreadyExist::what() {
+    return "Group already exists\n";
 }
 
-const char* StudentNotFound::what()
-{
-	return "Студент не найден\n";
+const char* StudentNotFound::what() {
+    return "Student not found\n";
 }
 
-const char* SubjectNotFound::what()
-{
-	return "Предмет не найден\n";
+const char* SubjectNotFound::what() {
+    return "Subject not found\n";
 }
 
-const char* StudentIndexNotFound::what()
-{
-	return "Такого нет\n";
+const char* StudentIndexNotFound::what() {
+    return "Index not found\n";
 }
