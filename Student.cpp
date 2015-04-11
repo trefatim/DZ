@@ -3,6 +3,7 @@
 #include <list>
 #include <string>
 #include "Student.h"
+#include "Exceptions.h"
 
 using std::cout;
 using std::cin;
@@ -17,14 +18,12 @@ Students::Students() {
 }
 
 Students::Students(const string& FirstName, const string& SecondName,
-    const string& Patronymic, int* points, const int& N) {
+    const string& Patronymic, list<int> points, const int N) {
     NumOfSub = N;
     this->FirstName = FirstName;
     this->SecondName = SecondName;
     this->Patronymic = Patronymic;
-    for (int i = 0; i < N; i++) {
-        this->points.push_back(points[i]);
-    }
+    this->points = points;
 }
 
 Students::Students(const Students& st) {
@@ -35,17 +34,17 @@ Students::Students(const Students& st) {
     points = st.points;
 }
 
-string Students::GetFirstName()const {
+const string& Students::GetFirstName() const {
     return FirstName;
 }
-string Students::GetSecondName()const {
+const string& Students::GetSecondName() const {
     return SecondName;
 }
-string Students::GetPatronymic()const {
+const string& Students::GetPatronymic() const {
     return Patronymic;
 }
 
-list<int> Students::GetStudentPoints()const {
+const list<int>& Students::GetStudentPoints() const {
     return points;
 }
 
@@ -66,6 +65,9 @@ void Students::SetListPoints(list<int> point) {
 }
 
 Students& Students::operator=(const Students& st) {
+    if ((*this) == st) {
+        throw AssignmentError();
+    }
     FirstName = st.FirstName;
     SecondName = st.SecondName;
     Patronymic = st.Patronymic;
@@ -74,9 +76,10 @@ Students& Students::operator=(const Students& st) {
     return *this;
 }
 
-bool Students::operator<(const Students& st) {
+bool Students::operator<(const Students& st) const {
     float sr1 = 0, sr2 = 0;
-    for (list<int>::iterator it = points.begin(); it != points.end(); ++it) {
+    for (list<int>::const_iterator it = points.begin();
+        it != points.end(); ++it) {
         sr1+=(*it);
     }
     list<int> l = st.points;
@@ -88,9 +91,10 @@ bool Students::operator<(const Students& st) {
     return sr1 < sr2;
 }
 
-bool Students::operator>(const Students& st) {
+bool Students::operator>(const Students& st) const {
     float sr1 = 0, sr2 = 0;
-    for (list<int>::iterator it = points.begin(); it != points.end(); ++it) {
+    for (list<int>::const_iterator it = points.begin();
+        it != points.end(); ++it) {
         sr1+=(*it);
     }
     list<int> l = st.points;
@@ -102,7 +106,7 @@ bool Students::operator>(const Students& st) {
     return sr1 > sr2;
 }
 
-bool Students::operator == (const Students& st)const {
+bool Students::operator == (const Students& st) const {
     if ((st.FirstName == FirstName) && (st.SecondName == SecondName) &&
         (st.Patronymic == Patronymic) && (st.NumOfSub == NumOfSub) &&
         (st.points == points)) {
@@ -112,6 +116,6 @@ bool Students::operator == (const Students& st)const {
     }
 }
 
-bool Students::operator != (const Students& st)const {
+bool Students::operator != (const Students& st) const {
     return !(operator == (st));
 }

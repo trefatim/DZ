@@ -5,6 +5,7 @@
 #include <iterator>
 #include <iostream>
 #include "Group.h"
+#include "Exceptions.h"
 
 using std::cout;
 using std::cin;
@@ -18,15 +19,13 @@ StudyGroup::StudyGroup() {
     Curator = "";
 }
 
-StudyGroup::StudyGroup(const int& NoSub, const string& Gr, const string& Cur,
-    string *Sub) {
+StudyGroup::StudyGroup(const int NoSub, const string& Gr, const string& Cur,
+    list<string> Sub) {
     NumOfSubj = NoSub;
     NumOfStud = 0;
     Group = Gr;
     Curator = Cur;
-    for (int i=0; i < NoSub; i++) {
-        Subjects.push_back(Sub[i]);
-    }
+    Subjects = Sub;
 }
 
 StudyGroup::StudyGroup(const StudyGroup& st) {
@@ -38,23 +37,23 @@ StudyGroup::StudyGroup(const StudyGroup& st) {
     student = st.student;
 }
 
-int StudyGroup::GetNumOfStudents()const {
+int StudyGroup::GetCount() const {
     return NumOfStud;
 }
 
-string StudyGroup::GetGroupName()const {
+const string& StudyGroup::GetGroupName() const {
     return Group;
 }
 
-int StudyGroup::GetNumOfSubjects()const {
+int StudyGroup::GetNumOfSubjects() const {
     return NumOfSubj;
 }
 
-void StudyGroup::SetNumOfStud(const int& n) {
+void StudyGroup::SetNumOfStud(const int n) {
     NumOfStud = n;
 }
 
-void StudyGroup::SetNumOfSubjects(const int& n) {
+void StudyGroup::SetNumOfSubjects(const int n) {
     NumOfSubj = n;
 }
 
@@ -79,7 +78,7 @@ bool StudyGroup::HasLink(const Students& st) {
     return false;
 }
 
-string StudyGroup::GetSubject(const int& n) {
+const string StudyGroup::GetSubject(const int n) {
     int count = 0;
     for (list<string>::iterator it = Subjects.begin();
         it != Subjects.end(); ++it) {
@@ -100,7 +99,7 @@ int StudyGroup::FindIndexSubject(const string& Sub) {
         }
         i++;
     }
-    return -1;
+    throw SubjectNotFound(Sub);
 }
 
 ostream& operator  << (ostream& out, list<StudyGroup>::iterator it) {
@@ -127,7 +126,7 @@ ostream& operator  << (ostream& out, list<StudyGroup>::iterator it) {
     return out;
 }
 
-list <Students> StudyGroup::GetStudentList()const {
+list <Students> StudyGroup::GetStudentList() const {
     return student;
 }
 
@@ -139,8 +138,9 @@ void StudyGroup::SetGroupName(const string& name) {
     Group = name;
 }
 
-void StudyGroup::FindDuty() {
+list<Students> StudyGroup::FindDuty() {
     int k, k1 = 0;
+    list<Students> l;
     for (list<Students>::iterator i = student.begin();
         i != student.end(); i++) {
         k = 0;
@@ -152,17 +152,18 @@ void StudyGroup::FindDuty() {
             }
         }
         if (k == 1) {
-            cout << i->GetSecondName() << " " << i->GetFirstName()
-                << " " << i->GetPatronymic() << "\n";
+            l.push_back(*i);
         }
     }
     if (k1 == 0) {
-        cout << "There's no any debtors";
+        throw NoAnyDebtors();
     }
+    return l;
 }
 
-void StudyGroup::FindExcellent() {
+list<Students> StudyGroup::FindExcellent() {
     int k, k1 = 0;
+    list<Students> l;
     for (list<Students>::iterator i = student.begin();
         i != student.end(); i++) {
         k = 0;
@@ -173,14 +174,14 @@ void StudyGroup::FindExcellent() {
             }
         }
         if (k == NumOfSubj) {
-            cout << i->GetSecondName() << " " << i->GetFirstName() << " "
-                << i->GetPatronymic() << "\n";
+            l.push_back(*i);
             k1++;
         }
     }
     if (k1 == 0) {
-        cout << "There's no any excellent students";
+        throw NoAnyExcellentStudent();
     }
+    return l;
 }
 
 void StudyGroup::SrAllSubjects() {
@@ -203,7 +204,7 @@ void StudyGroup::SrAllSubjects() {
     }
 }
 
-void StudyGroup::SrOneSubject(const int& ind) {
+void StudyGroup::SrOneSubject(const int ind) {
     if (NumOfStud == 0) {
         cout << "There's no any students";
     } else {
@@ -225,6 +226,9 @@ void StudyGroup::SrOneSubject(const int& ind) {
 }
 
 StudyGroup& StudyGroup::operator =(const StudyGroup& st) {
+    if ((*this) == st) {
+        throw AssignmentError();
+    }
     NumOfStud = st.NumOfStud;
     NumOfSubj = st.NumOfSubj;
     Group = st.Group;
@@ -234,39 +238,41 @@ StudyGroup& StudyGroup::operator =(const StudyGroup& st) {
     return *this;
 }
 
-bool StudyGroup::operator<(const StudyGroup& st)const {
+bool StudyGroup::operator<(const StudyGroup& st) const {
     return NumOfStud < st.NumOfStud;
 }
 
-bool StudyGroup::operator>(const StudyGroup& st)const {
+bool StudyGroup::operator>(const StudyGroup& st) const {
     return NumOfStud > st.NumOfStud;
 }
 
-bool StudyGroup::operator == (const StudyGroup& st)const {
+bool StudyGroup::operator == (const StudyGroup& st) const {
     return Group == st.Group;
 }
 
-bool StudyGroup::operator != (const StudyGroup& st)const {
+bool StudyGroup::operator != (const StudyGroup& st) const {
     return !(operator == (st));
 }
 
 void StudyGroup::Add(const Students& st) {
+    if (HasLink(st) == true) {
+        throw StudentAlreadyExist(st.GetSecondName(), st.GetFirstName(),
+            st.GetPatronymic());
+    }
     student.push_back(st);
     NumOfStud++;
 }
 
 Students& StudyGroup::GetLink(const string& SN, const string& FN,
     const string& PT) {
-    static Students st;
-    int j = 0;
     for (list<Students>::iterator it = student.begin();
         it != student.end(); it++) {
         if ((it->GetFirstName() == FN) && (it->GetSecondName() == SN) &&
             (it->GetPatronymic() == PT)) {
-            st = (*it);
+           return (*it);
         }
     }
-    return st;
+    throw StudentNotFound(SN, FN, PT);
 }
 
 void StudyGroup::RemoveByLink(const Students& st) {
@@ -281,16 +287,31 @@ void StudyGroup::RemoveByLink(const Students& st) {
     }
 }
 
-void StudyGroup::RemoveByIndex(const int& i) {
+void StudyGroup::RemoveByIndex(const int i) {
     int j = 0;
+    if ((i > NumOfStud) ||
+        (i == 0)) {
+            throw StudentIndexNotFound(i);
+    }
     for (list<Students>::iterator it = student.begin(); it != student.end();) {
         j++;
         if (j == i) {
             it = student.erase(it);
             NumOfStud--;
-            cout << "Student has been deleted";
         } else {
             it++;
         }
     }
+}
+
+Students& StudyGroup::Get(const int index) {
+    int j = 0;
+    for (list<Students>::iterator it = student.begin();
+        it != student.end(); ++it) {
+        if (index == j) {
+            return (*it);
+        }
+        j++;
+    }
+    throw StudentIndexNotFound(index);
 }

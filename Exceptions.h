@@ -2,42 +2,71 @@
 #pragma once
 #include <iostream>
 #include <exception>
+#include <string>
 
 using std::cout;
 using std::cin;
 using std::exception;
+using std::string;
 
 class NoAnyGroup : public exception {
  public:
-    const char* what();
+    const char* what() const;
 };
 
 class GroupNotFound : public exception {
+    string group;
  public:
-    const char* what();
+     explicit GroupNotFound(const string& gr);
+     const char* what() const;
 };
 
 class StudentAlreadyExist : public exception {
+    string name;
  public:
-    const char* what();
+     StudentAlreadyExist(const string& SN, const string& FN, const string& PT);
+    const char* what() const;
 };
 
 class GroupAlreadyExist : public exception {
+    string group;
  public:
-    const char* what();
+    explicit GroupAlreadyExist(const string& gr);
+    const char* what() const;
 };
 
 class StudentNotFound : public exception {
+    string name;
  public:
-    const char* what();
+     StudentNotFound(const string& SN, const string& FN, const string& PT);
+    const char* what() const;
 };
 
 class SubjectNotFound : public exception {
+    string subject;
  public:
-    const char* what();
+    explicit SubjectNotFound(const string& sub);
+    const char* what() const;
 };
 
 class StudentIndexNotFound : public exception {
+    string str;
  public:
-    const char* what();
+    explicit StudentIndexNotFound(const int ind);
+    const char* what() const;
+};
+
+class NoAnyDebtors : public exception {
+ public:
+    const char* what() const;
+};
+
+class NoAnyExcellentStudent : public exception {
+ public:
+    const char* what() const;
+};
+
+class AssignmentError : public exception {
+ public:
+    const char* what() const;
 };
