@@ -11,7 +11,7 @@ using std::stringstream;
 
 
 const char* NoAnyGroup::what() const {
-    return "There's no any group\n";
+    return "There's no any group";
 }
 
 const char* GroupNotFound::what() const {
@@ -19,7 +19,7 @@ const char* GroupNotFound::what() const {
 }
 
 GroupNotFound::GroupNotFound(const string& gr) {
-    group = gr+" group not found\n";
+    group = gr+" group not found";
 }
 
 const char* StudentAlreadyExist::what() const {
@@ -28,7 +28,11 @@ const char* StudentAlreadyExist::what() const {
 
 StudentAlreadyExist::StudentAlreadyExist(const string& SN,
     const string& FN, const string& PT) {
-    name = "Student "+SN+" "+FN+" "+PT+" already exist\n";
+    name = "Student "+SN+" "+FN+" "+PT+" already exist";
+}
+
+const char* WrongSubjectIndex::what() const {
+    return "Wrong subject index";
 }
 
 const char* GroupAlreadyExist::what() const {
@@ -36,7 +40,7 @@ const char* GroupAlreadyExist::what() const {
 }
 
 GroupAlreadyExist::GroupAlreadyExist(const string& gr) {
-    group = gr+" already exist\n";
+    group = gr+" already exist";
 }
 
 const char* StudentNotFound::what() const {
@@ -45,7 +49,7 @@ const char* StudentNotFound::what() const {
 
 StudentNotFound::StudentNotFound(const string& SN, const string& FN,
     const string& PT) {
-    name = "Student "+SN+" "+FN+" "+PT+" not found\n";
+    name = "Student "+SN+" "+FN+" "+PT+" not found";
 }
 
 const char* SubjectNotFound::what() const {
@@ -53,14 +57,14 @@ const char* SubjectNotFound::what() const {
 }
 
 SubjectNotFound::SubjectNotFound(const string& sub) {
-    subject = "Subject "+sub+" not found\n";
+    subject = "Subject "+sub+" not found";
 }
 
 const char* StudentIndexNotFound::what() const {
     return str.c_str();
 }
 
-StudentIndexNotFound::StudentIndexNotFound(const int ind) {
+StudentIndexNotFound::StudentIndexNotFound(int ind) {
     stringstream a;
     a << ind;
     a >> str;
@@ -68,13 +72,17 @@ StudentIndexNotFound::StudentIndexNotFound(const int ind) {
 }
 
 const char* NoAnyDebtors::what() const {
-    return "There's no any debtors\n";
+    return "There's no any debtors";
 }
 
 const char* NoAnyExcellentStudent::what() const {
-    return "There's no any excellent students\n";
+    return "There's no any excellent students";
 }
 
-const char* AssignmentError::what() const {
-    return "Assigment error";
+NoAnyStudents::NoAnyStudents(const string& Gr) {
+    Str = "There's no any students in " + Gr + " group";
+}
+
+const char* NoAnyStudents::what() const {
+    return Str.c_str();
 }

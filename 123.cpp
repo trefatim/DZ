@@ -16,9 +16,9 @@ using std::list;
 using std::endl;
 using std::exception;
 
-int FindGroup(string gr, list<StudyGroup> l) {
+int FindGroup(string gr, const list<StudyGroup>& l) {
     int k = 0;
-    for (list<StudyGroup>::iterator i = l.begin(); i != l.end(); i++) {
+    for (list<StudyGroup>::const_iterator i = l.begin(); i != l.end(); i++) {
         if (gr == i->GetGroupName()) {
             k = 1;
         }
@@ -26,13 +26,224 @@ int FindGroup(string gr, list<StudyGroup> l) {
     return k;
 }
 
+void AddGroup(list<StudyGroup>* Lis) {
+    string Grou, Cura;
+    int a;
+    fflush(stdin);
+    cout << "Enter group name:" << endl;
+    getline(cin, Grou);
+    if (FindGroup(Grou, (*Lis)) == 1) {
+        throw GroupAlreadyExist(Grou);
+    }
+    cout << "Enter Curator's FIO:" << endl;
+    getline(cin, Cura);
+    cout << "Enter number of subjects:" << endl;
+    cin  >>  a;
+    list<string> Subj;
+    string Subject;
+    cout << "Enter list of subjects:" << endl;
+    fflush(stdin);
+    for (int i = 0; i < a; i++) {
+        getline(cin, Subject);
+        Subj.push_back(Subject);
+    }
+    StudyGroup Gruppa(Grou, Cura, Subj);
+    Lis->push_back(Gruppa);
+    cout << "Group has been added" << endl;
+}
+
+void AddStudent(list<StudyGroup>* Lis) {
+    string Grou, SN, FN, PT;
+    int a, Point;
+    cout << "Enter group:"<< endl;
+    fflush(stdin);
+    getline(cin, Grou);
+    if (FindGroup(Grou, (*Lis)) == 0) {
+        throw GroupNotFound(Grou);
+    }
+    for (list<StudyGroup>::iterator i=Lis->begin();
+        i != Lis->end(); i++) {
+            if (i->GetGroupName() == Grou) {
+                a = i->GetNumOfSubjects();
+                cout << "Enter student's second name:" << endl;
+                fflush(stdin);
+                getline(cin, SN);
+                cout << "Enter student's first name:" << endl;
+                fflush(stdin);
+                getline(cin, FN);
+                cout << "Enter student's pathronymic:" << endl;
+                fflush(stdin);
+                getline(cin, PT);
+                list <int> points;
+                cout << "Enter points" << endl;
+                for (int j=0; j < a; j++) {
+                    cout << i->GetSubject(j) << " " << endl;
+                    fflush(stdin);
+                    cin >> Point;
+                    points.push_back(Point);
+                }
+                Students st(FN, SN, PT, points);
+                i->Add(st);
+                cout << "Student has been added\n";
+            }
+    }
+}
+
+void PrintAll(const list<StudyGroup>& Lis) {
+    for (list<StudyGroup>::const_iterator i=Lis.begin();
+        i != Lis.end(); i++) {
+            cout << i;
+    }
+}
+
+void DeleteGroup(list<StudyGroup>* Lis) {
+    string Grou;
+    cout << "Enter group: " << endl;
+    fflush(stdin);
+    getline(cin, Grou);
+    if (FindGroup(Grou, (*Lis)) == 0) {
+        throw GroupNotFound(Grou);
+    }
+    for (list<StudyGroup>::iterator i = Lis->begin();
+        i != Lis->end();) {
+            if (i->GetGroupName() == Grou) {
+            i = Lis->erase(i);
+            } else {
+                i++;
+            }
+    }
+    cout << "Group has been deleted" << endl;
+}
+
+void DeleteStudent(list<StudyGroup>* Lis) {
+    string Grou, FN, SN, PT;
+    cout << "Enter group: " << endl;
+    fflush(stdin);
+    getline(cin, Grou);
+    if (FindGroup(Grou, (*Lis)) == 0) {
+        throw GroupNotFound(Grou);
+    }
+    for (list<StudyGroup>::iterator i = Lis->begin();
+        i != Lis->end(); i++) {
+            if (i->GetGroupName() == Grou) {
+                cout << "Enter student's second name: " << endl;
+                fflush(stdin);
+                getline(cin, SN);
+                cout << "Enter student's first name: " << endl;
+                fflush(stdin);
+                getline(cin, FN);
+                cout << "Enter student's pathronymic: " << endl;
+                fflush(stdin);
+                getline(cin, PT);
+                Students s = i->GetLink(SN, FN, PT);
+                i->RemoveByLink(s);
+            }
+    }
+}
+
+void Debtors(const list<StudyGroup>& Lis) {
+    string Grou;
+    cout << "Enter group: " << endl;
+    fflush(stdin);
+    getline(cin, Grou);
+    if (FindGroup(Grou, Lis) == 0) {
+        throw GroupNotFound(Grou);
+    }
+    for (list<StudyGroup>::const_iterator i = Lis.begin();
+        i != Lis.end(); i++) {
+            if (i->GetGroupName() == Grou) {
+                list<Students> List = i->FindDuty();
+                for (list<Students>::iterator it = List.begin();
+                    it != List.end(); ++it) {
+                        cout << it->GetSecondName() << " "
+                            << it->GetFirstName() << " "
+                            << it->GetPatronymic() << endl;
+                }
+            }
+    }
+}
+
+void Excellent(const list<StudyGroup>& Lis) {
+    string Grou;
+    cout << "Enter group: " << endl;
+    fflush(stdin);
+    getline(cin, Grou);
+    if (FindGroup(Grou, Lis) == 0) {
+        throw GroupNotFound(Grou);
+    }
+    for (list<StudyGroup>::const_iterator i = Lis.begin();
+        i != Lis.end(); i++) {
+            if (i->GetGroupName() == Grou) {
+                list<Students> List = i->FindExcellent();
+                for (list<Students>::iterator it = List.begin();
+                    it != List.end(); ++it) {
+                        cout << it->GetSecondName() << " "
+                            << it->GetFirstName() << " "
+                            << it->GetPatronymic() << endl;
+                }
+            }
+    }
+}
+
+void AverageAll(const list<StudyGroup>& Lis) {
+    string Grou;
+    cout << "Enter group: " << endl;
+    fflush(stdin);
+    getline(cin, Grou);
+    if (FindGroup(Grou, Lis) == 0) {
+        throw GroupNotFound(Grou);
+    }
+    for (list<StudyGroup>::const_iterator i = Lis.begin();
+        i != Lis.end(); i++) {
+            if (i->GetGroupName() == Grou) {
+                i->SrAllSubjects();
+            }
+    }
+}
+
+void AverageOne(const list<StudyGroup>& Lis) {
+    string Grou, Sub;
+    cout << "Enter group: " << endl;
+    fflush(stdin);
+    getline(cin, Grou);
+    if (FindGroup(Grou, Lis) == 0) {
+        throw GroupNotFound(Grou);
+    }
+    for (list<StudyGroup>::const_iterator i = Lis.begin();
+        i != Lis.end(); i++) {
+            if (i->GetGroupName() == Grou) {
+                cout << "Enter subject: " << endl;
+                fflush(stdin);
+                getline(cin, Sub);
+                int Index = i->FindIndexSubject(Sub);
+                i->SrOneSubject(Index);
+            }
+    }
+}
+
+void DeleteStByInd(list<StudyGroup>* Lis) {
+    string Grou;
+    unsigned int a;
+    cout << "Enter group: " << endl;
+    fflush(stdin);
+    getline(cin, Grou);
+    if (FindGroup(Grou, (*Lis)) == 0) {
+        throw GroupNotFound(Grou);
+    }
+    for (list<StudyGroup>::iterator i = Lis->begin();
+        i != Lis->end(); i++) {
+            if (i->GetGroupName() == Grou) {
+                cout << "Enter sequence number: " << endl;
+                fflush(stdin);
+                cin >> a;
+                i->RemoveByIndex(a);
+                cout << "Student has been deleted" << endl;
+            }
+    }
+}
+
 int main(int argc, char * argv[]) {
-    setlocale(LC_ALL, "rus");
-    int point, a, index, count = 0;
-    string Grou, Cura, Sub, FN, SN, PT;
-    char c;
     list <StudyGroup> MyList;
-    list <Students> List;
     while (1) {
         system("cls");
         cout << "0:Add group\n";
@@ -46,32 +257,11 @@ int main(int argc, char * argv[]) {
         cout << "8:Average score for one subject\n";
         cout << "9:Delete student by sequence number\n";
         cout << "e:Exit\n";
-        c = _getch();
+        char c = _getch();
         try {
             switch (c) {
             case '0': {
-                fflush(stdin);
-                cout << "Enter group name:" << endl;
-                getline(cin, Grou);
-                if (FindGroup(Grou, MyList) == 1) {
-                    throw GroupAlreadyExist(Grou);
-                }
-                cout << "Enter Curator's FIO:" << endl;
-                getline(cin, Cura);
-                cout << "Enter number of subjects:" << endl;
-                cin  >>  a;
-                list<string> Subj;
-                string Subject;
-                cout << "Enter list of subjects:" << endl;
-                fflush(stdin);
-                for (int i = 0; i < a; i++) {
-                    getline(cin, Subject);
-                    Subj.push_back(Subject);
-                }
-                StudyGroup gruppa(a, Grou, Cura, Subj);
-                MyList.push_back(gruppa);
-                count++;
-                cout << "Group has been added";
+                AddGroup(&MyList);
                 system("pause");
                 break;
                     }
@@ -80,38 +270,7 @@ int main(int argc, char * argv[]) {
                 if (MyList.empty()) {
                     throw NoAnyGroup();
                 }
-                cout << "Enter group:";
-                fflush(stdin);
-                getline(cin, Grou);
-                if (FindGroup(Grou, MyList) == 0) {
-                    throw GroupNotFound(Grou);
-                }
-                for (list<StudyGroup>::iterator i=MyList.begin();
-                    i != MyList.end(); i++) {
-                        if (i->GetGroupName() == Grou) {
-                        a = i->GetNumOfSubjects();
-                        cout << "Enter student's second name:";
-                        fflush(stdin);
-                        getline(cin, SN);
-                        cout << "Enter student's first name:";
-                        fflush(stdin);
-                        getline(cin, FN);
-                        cout << "Enter student's pathronymic:";
-                        fflush(stdin);
-                        getline(cin, PT);
-                        list <int> points;
-                        cout << "Enter points\n";
-                        for (int j=0; j < a; j++) {
-                            cout << i->GetSubject(j) << " ";
-                            fflush(stdin);
-                            cin >> point;
-                            points.push_back(point);
-                        }
-                        Students st(FN, SN, PT, points, a);
-                        i->Add(st);
-                        cout << "Student has been added\n";
-                    }
-                }
+                AddStudent(&MyList);
                 system("pause");
                 break;
                       }
@@ -120,10 +279,7 @@ int main(int argc, char * argv[]) {
                 if (MyList.empty()) {
                     throw NoAnyGroup();
                 }
-                for (list<StudyGroup>::iterator i=MyList.begin();
-                    i != MyList.end(); i++) {
-                        cout << i;
-                }
+                PrintAll(MyList);
                 system("pause");
                 break;
 
@@ -131,21 +287,7 @@ int main(int argc, char * argv[]) {
                 if (MyList.empty()) {
                     throw NoAnyGroup();
                 }
-                cout << "Enter group: ";
-                fflush(stdin);
-                getline(cin, Grou);
-                if (FindGroup(Grou, MyList) == 0) {
-                    throw GroupNotFound(Grou);
-                }
-                for (list<StudyGroup>::iterator i = MyList.begin();
-                    i != MyList.end();) {
-                        if (i->GetGroupName() == Grou) {
-                        i = MyList.erase(i);
-                        } else {
-                            i++;
-                        }
-                }
-                cout << "Group has been deleted";
+                DeleteGroup(&MyList);
                 system("pause");
                 break;
                       }
@@ -154,28 +296,7 @@ int main(int argc, char * argv[]) {
                 if (MyList.empty()) {
                     throw NoAnyGroup();
                 }
-                cout << "Enter group: ";
-                fflush(stdin);
-                getline(cin, Grou);
-                if (FindGroup(Grou, MyList) == 0) {
-                    throw GroupNotFound(Grou);
-                }
-                for (list<StudyGroup>::iterator i = MyList.begin();
-                    i != MyList.end(); i++) {
-                        if (i->GetGroupName() == Grou) {
-                        cout << "Enter student's second name: ";
-                        fflush(stdin);
-                        getline(cin, SN);
-                        cout << "Enter student's first name: ";
-                        fflush(stdin);
-                        getline(cin, FN);
-                        cout << "Enter student's pathronymic: ";
-                        fflush(stdin);
-                        getline(cin, PT);
-                        Students s = i->GetLink(SN, FN, PT);
-                        i->RemoveByLink(s);
-                        }
-                }
+                DeleteStudent(&MyList);
                 system("pause");
                 break;
                       }
@@ -184,24 +305,7 @@ int main(int argc, char * argv[]) {
                 if (MyList.empty()) {
                     throw NoAnyGroup();
                 }
-                cout << "Enter group: ";
-                fflush(stdin);
-                getline(cin, Grou);
-                if (FindGroup(Grou, MyList) == 0) {
-                    throw GroupNotFound(Grou);
-                }
-                for (list<StudyGroup>::iterator i = MyList.begin();
-                    i != MyList.end(); i++) {
-                        if (i->GetGroupName() == Grou) {
-                            List = i->FindDuty();
-                            for (list<Students>::iterator it = List.begin();
-                                it != List.end(); ++it) {
-                                    cout << it->GetSecondName() << " "
-                                    << it->GetFirstName() << " "
-                                    << it->GetPatronymic() << "\n";
-                            }
-                        }
-                }
+                Debtors(MyList);
                 system("pause");
                 break;
                       }
@@ -210,24 +314,7 @@ int main(int argc, char * argv[]) {
                 if (MyList.empty()) {
                     throw NoAnyGroup();
                 }
-                cout << "Enter group: ";
-                fflush(stdin);
-                getline(cin, Grou);
-                if (FindGroup(Grou, MyList) == 0) {
-                    throw GroupNotFound(Grou);
-                }
-                for (list<StudyGroup>::iterator i = MyList.begin();
-                    i != MyList.end(); i++) {
-                        if (i->GetGroupName() == Grou) {
-                            List = i->FindExcellent();
-                            for (list<Students>::iterator it = List.begin();
-                                it != List.end(); ++it) {
-                                    cout << it->GetSecondName() << " "
-                                    << it->GetFirstName() << " "
-                                    << it->GetPatronymic() << "\n";
-                            }
-                        }
-                }
+                Excellent(MyList);
                 system("pause");
                 break;
                       }
@@ -236,18 +323,7 @@ int main(int argc, char * argv[]) {
                 if (MyList.empty()) {
                     throw NoAnyGroup();
                 }
-                cout << "Enter group: ";
-                fflush(stdin);
-                getline(cin, Grou);
-                if (FindGroup(Grou, MyList) == 0) {
-                    throw GroupNotFound(Grou);
-                }
-                for (list<StudyGroup>::iterator i = MyList.begin();
-                    i != MyList.end(); i++) {
-                        if (i->GetGroupName() == Grou) {
-                        i->SrAllSubjects();
-                    }
-                }
+                AverageAll(MyList);
                 system("pause");
                 break;
                       }
@@ -256,22 +332,7 @@ int main(int argc, char * argv[]) {
                 if (MyList.empty()) {
                     throw NoAnyGroup();
                 }
-                cout << "Enter group: ";
-                fflush(stdin);
-                getline(cin, Grou);
-                if (FindGroup(Grou, MyList) == 0) {
-                    throw GroupNotFound(Grou);
-                }
-                for (list<StudyGroup>::iterator i = MyList.begin();
-                    i != MyList.end(); i++) {
-                        if (i->GetGroupName() == Grou) {
-                            cout << "Enter subject: ";
-                            fflush(stdin);
-                            getline(cin, Sub);
-                            index = i->FindIndexSubject(Sub);
-                            i->SrOneSubject(index);
-                        }
-                }
+                AverageOne(MyList);
                 system("pause");
                 break;
                       }
@@ -280,22 +341,7 @@ int main(int argc, char * argv[]) {
                 if (MyList.empty()) {
                     throw NoAnyGroup();
                 }
-                cout << "Enter group: ";\
-                fflush(stdin);
-                getline(cin, Grou);
-                if (FindGroup(Grou, MyList) == 0) {
-                    throw GroupNotFound(Grou);
-                }
-                for (list<StudyGroup>::iterator i = MyList.begin();
-                    i != MyList.end(); i++) {
-                        if (i->GetGroupName() == Grou) {
-                            cout << "Enter sequence number: ";
-                            fflush(stdin);
-                            cin >> a;
-                            i->RemoveByIndex(a);
-                            cout << "Student has been deleted";
-                        }
-                }
+                DeleteStByInd(&MyList);
                 system("pause");
                 break;
                       }
@@ -304,12 +350,12 @@ int main(int argc, char * argv[]) {
                 return 0;
 
             default:
-                cout << "Error, try again\n";
+                cout << "Error, try again" << endl;
                 system("Pause");
         }
         }
         catch(exception &ex) {
-            cout << ex.what();
+            cout << ex.what() << endl;
             system("pause");
         }
     }

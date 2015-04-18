@@ -35,6 +35,11 @@ class GroupAlreadyExist : public exception {
     const char* what() const;
 };
 
+class WrongSubjectIndex : public exception {
+ public:
+    const char* what() const;
+};
+
 class StudentNotFound : public exception {
     string name;
  public:
@@ -52,7 +57,7 @@ class SubjectNotFound : public exception {
 class StudentIndexNotFound : public exception {
     string str;
  public:
-    explicit StudentIndexNotFound(const int ind);
+    explicit StudentIndexNotFound(int ind);
     const char* what() const;
 };
 
@@ -66,7 +71,9 @@ class NoAnyExcellentStudent : public exception {
     const char* what() const;
 };
 
-class AssignmentError : public exception {
+class NoAnyStudents : public exception {
+    string Str;
  public:
+    explicit NoAnyStudents(const string& Gr);
     const char* what() const;
 };
