@@ -46,5 +46,5 @@ class StudyGroup {
     bool operator >(const StudyGroup& St) const;
     bool operator  ==(const StudyGroup& st) const;
     bool operator !=(const StudyGroup& st) const;
-    Students& Get(int Index);
+    Students& Get(unsigned int Index);
 };

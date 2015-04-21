@@ -71,14 +71,6 @@ StudentIndexNotFound::StudentIndexNotFound(int ind) {
     str+=" index not found";
 }
 
-const char* NoAnyDebtors::what() const {
-    return "There's no any debtors";
-}
-
-const char* NoAnyExcellentStudent::what() const {
-    return "There's no any excellent students";
-}
-
 NoAnyStudents::NoAnyStudents(const string& Gr) {
     Str = "There's no any students in " + Gr + " group";
 }

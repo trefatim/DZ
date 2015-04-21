@@ -61,16 +61,6 @@ class StudentIndexNotFound : public exception {
     const char* what() const;
 };
 
-class NoAnyDebtors : public exception {
- public:
-    const char* what() const;
-};
-
-class NoAnyExcellentStudent : public exception {
- public:
-    const char* what() const;
-};
-
 class NoAnyStudents : public exception {
     string Str;
  public:

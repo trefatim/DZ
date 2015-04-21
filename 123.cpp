@@ -153,6 +153,11 @@ void Debtors(const list<StudyGroup>& Lis) {
         i != Lis.end(); i++) {
             if (i->GetGroupName() == Grou) {
                 list<Students> List = i->FindDuty();
+                if (List.empty()) {
+                    cout << "No any debtors in "
+                        << i->GetGroupName() << " group" << endl;
+                    return;
+                }
                 for (list<Students>::iterator it = List.begin();
                     it != List.end(); ++it) {
                         cout << it->GetSecondName() << " "
@@ -175,6 +180,11 @@ void Excellent(const list<StudyGroup>& Lis) {
         i != Lis.end(); i++) {
             if (i->GetGroupName() == Grou) {
                 list<Students> List = i->FindExcellent();
+                if (List.empty()) {
+                    cout << "No any excellent students in "
+                        << i->GetGroupName() << " group" << endl;
+                    return;
+                }
                 for (list<Students>::iterator it = List.begin();
                     it != List.end(); ++it) {
                         cout << it->GetSecondName() << " "

@@ -7,10 +7,13 @@
 #include "Group.h"
 #include "Exceptions.h"
 
+enum {ExcellentPoint = 85, BadPoint = 60};
+
 using std::cout;
 using std::cin;
 using std::string;
 using std::list;
+using std::advance;
 using std::endl;
 
 StudyGroup::StudyGroup() {
@@ -136,7 +139,7 @@ list<Students> StudyGroup::FindDuty() const {
         k = 0;
         list<int> arr = i->GetStudentPoints();
         for (list<int>::iterator j = arr.begin(); j != arr.end(); ++j) {
-            if ((*j) < 60) {
+            if ((*j) < BadPoint) {
                 k = 1;
                 k1++;
             }
@@ -144,9 +147,6 @@ list<Students> StudyGroup::FindDuty() const {
         if (k == 1) {
             l.push_back(*i);
         }
-    }
-    if (k1 == 0) {
-        throw NoAnyDebtors();
     }
     return l;
 }
@@ -162,7 +162,7 @@ list<Students> StudyGroup::FindExcellent() const {
         k = 0;
         list<int> arr = i->GetStudentPoints();
         for (list<int>::iterator j = arr.begin(); j != arr.end(); ++j) {
-            if ((*j) >= 85) {
+            if ((*j) >= ExcellentPoint) {
                 k++;
             }
         }
@@ -170,9 +170,6 @@ list<Students> StudyGroup::FindExcellent() const {
             l.push_back(*i);
             k1++;
         }
-    }
-    if (k1 == 0) {
-        throw NoAnyExcellentStudent();
     }
     return l;
 }
@@ -280,28 +277,19 @@ void StudyGroup::RemoveByIndex(unsigned int Ind) {
     if (Student.size() == 0) {
         throw NoAnyStudents(Group);
     }
-    int j = 0;
-    if ((Ind+1 > Student.size()) || (Ind < 0)) {
+    if (Ind+1 > Student.size()) {
         throw StudentIndexNotFound(Ind);
     }
-    for (list<Students>::iterator it = Student.begin(); it != Student.end();) {
-        j++;
-        if (j == Ind+1) {
-            it = Student.erase(it);
-        } else {
-            it++;
-        }
-    }
+    list<Students>::iterator it = Student.begin();
+    advance(it, Ind);
+    Student.erase(it);
 }
 
-Students& StudyGroup::Get(int Index) {
-    int j = 0;
-    for (list<Students>::iterator it = Student.begin();
-        it != Student.end(); ++it) {
-        if (Index == j) {
-            return (*it);
-        }
-        j++;
+Students& StudyGroup::Get(unsigned int Index) {
+    if (Index+1 > Student.size()) {
+        throw StudentIndexNotFound(Index);
     }
-    throw StudentIndexNotFound(Index);
+    list<Students>::iterator it = Student.begin();
+    advance(it, Index);
+    return (*it);
 }
